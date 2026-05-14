@@ -5,18 +5,22 @@ CFLAGS?= -O2 -g
 .PHONY: all build clean
 .SUFFIXES: .S .o
 
-BOOT_SRC=$(ARCH_DIR)/entry.S
-BOOT_OBJ=$(ARCH_DIR)/entry.o
+BOOTSECTOR_OBJ=$(ARCH_DIR)/bootsector.o
+LOADER_OBJ=$(ARCH_DIR)/loader.o
 
 all: build
 
-build: entry.bin
+build: bootsector.bin loader.bin
+	cat bootsector.bin loader.bin > bootloader.bin
 
-entry.bin: $(BOOT_OBJ)
+bootsector.bin: $(BOOTSECTOR_OBJ)
+	$(OBJCOPY) -O binary $< $@
+
+loader.bin: $(LOADER_OBJ)
 	$(OBJCOPY) -O binary $< $@
 
 $(ARCH_DIR)/%.o: $(ARCH_DIR)/%.S
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(ARCH_DIR)/*.o entry.bin
+	rm -f $(ARCH_DIR)/*.o bootsector.bin loader.bin bootloader.bin
